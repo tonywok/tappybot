@@ -1,6 +1,6 @@
-# A way to put tappy on time out
+# A way to make tappy be quiet
 #
-# shutup - Put tappy on timeout for 10 minutes
+# shutup - Make tappy be quiet for an hour
 #
 # come back - Bring tappy back
 
@@ -13,28 +13,28 @@ shutup_responses = (user) ->
   ]
 
 module.exports = (robot) ->
-  TIMEOUT = 10 * 60 * 10000
-  robot.brain.data.timeout = null
+  TIMEOUT = 1 * 60 * 60 * 10000
+  timer_id = null
+  robot.brain.data.quiet_time = false
 
-  start_timeout = ->
-    robot.brain.data.timeout = setTimeout (->
-      end_timeout()
+  start_quiet_time = ->
+    robot.brain.data.quiet_time = true
+    timer_id = setTimeout (->
+      end_quiet_time()
     ), TIMEOUT
 
-  end_timeout = ->
-    clearTimeout(robot.brain.data.timeout)
-    robot.brain.data.timeout = null
+  end_quiet_time = ->
+    clearTimeout(timer_id)
+    robot.brain.data.quiet_time = false
 
   robot.respond /shutup$/i, (msg) ->
-    if robot.brain.data.timeout?
-      msg.send "I'm already on timeout. Leave me alone."
-    else
-      start_timeout()
+    if !robot.brain.data.quiet_time
+      start_quiet_time()
       msg.send "Fine. " + msg.random shutup_responses(msg.message.user)
 
   robot.respond /come back$/, (msg) ->
-    if robot.brain.data.timeout?
-      end_timeout()
+    if robot.brain.data.quiet_time
+      end_quiet_time()
       msg.send "I'm back!"
     else
-      msg.send "I didn't go away"
+      msg.send "I'm still around!"

@@ -2,33 +2,25 @@ http = require "http"
 url  = require "url"
 
 module.exports = (robot) ->
-  TIMEOUT = 1 * 60 * 1000
-  rate_limit = null
-  thud_count = 0
+  TIMEOUT = 1 * 60 * 60 * 1000
+  START_HOUR = 8
+  END_HOUR = 18
+  rate_limit = false
 
   queue_thud = ->
-    if rate_limit?
-      thud_count++
-    else
+    if !rate_limit
+      rate_limit = true
       send_thud()
-      rate_limit = setTimeout (->
-        end_ratelimit()
+      setTimeout (->
+        rate_limit = false
       ), TIMEOUT
 
-  end_ratelimit = ->
-    rate_limit = null
-    if thud_count > 1
-      send_thud(thud_count)
-      thud_count = 0
-
-  send_thud = (count) ->
-    unless robot.brain.data.timeout?
+  send_thud = ->
+    hour = new Date().getHours()
+    if hour >= START_HOUR && hour <= END_HOUR
       robot.bot.rooms.forEach (room_id) ->
         user = {room: room_id}
-        if count?
-          robot.send user, "THUD! x#{count}"
-        else
-          robot.send user, "THUD!"
+        robot.send user, "THUD!"
 
   listen_port = process.env.HUBOT_TAP_LISTEN_PORT
   server = http.createServer (request, response) ->
@@ -36,7 +28,7 @@ module.exports = (robot) ->
     if url_parts.pathname == '/'
       response.writeHead(200, {'Content-Type': 'text/plain'})
       response.end()
-      unless robot.brain.data.timeout?
+      if !robot.brain.data.quiet_time
         queue_thud()
 
   server.listen(listen_port, "localhost")
