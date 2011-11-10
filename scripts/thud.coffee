@@ -5,22 +5,23 @@ module.exports = (robot) ->
   TIMEOUT = 1 * 60 * 60 * 1000
   START_HOUR = 8
   END_HOUR = 18
-  rate_limit = false
+
+  robot.brain.data.last_thud_time ||= 0
 
   queue_thud = ->
-    if !rate_limit
-      rate_limit = true
-      send_thud()
-      setTimeout (->
-        rate_limit = false
-      ), TIMEOUT
+    last_thud_time = robot.brain.data.last_thud_time
+    current_date = new Date
+    if ((current_date.getTime() - last_thud_time) > TIMEOUT)
+      hour = current_date.getHours()
+      if hour >= START_HOUR && hour <= END_HOUR
+        robot.brain.data.last_thud_time = current_date.getTime()
+        robot.brain.save()
+        send_thud()
 
   send_thud = ->
-    hour = new Date().getHours()
-    if hour >= START_HOUR && hour <= END_HOUR
-      robot.bot.rooms.forEach (room_id) ->
-        user = {room: room_id}
-        robot.send user, "THUD!"
+    robot.adapter.bot.rooms.forEach (room_id) ->
+      user = {room: room_id}
+      robot.adapter.send user, "THUD!"
 
   listen_port = process.env.HUBOT_TAP_LISTEN_PORT
   server = http.createServer (request, response) ->

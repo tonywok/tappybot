@@ -37,4 +37,5 @@ class DataImporter
 
 module.exports = (robot) ->
   robot.respond /stats$/i, (msg) ->
-    new DataImporter(msg).summary()
+    if !robot.brain.data.quiet_time
+      new DataImporter(msg).summary()

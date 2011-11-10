@@ -13,24 +13,41 @@ shutup_responses = (user) ->
   ]
 
 module.exports = (robot) ->
-  TIMEOUT = 1 * 60 * 60 * 10000
-  timer_id = null
-  robot.brain.data.quiet_time = false
+  INTERVAL = 60 * 1000
+  TIMEOUT = 60 * 60 * 1000
+
+  robot.brain.data.quiet_time ||= false
+  robot.brain.data.quiet_time_remaining ||= 0
+
+  countdown = ->
+    if robot.brain.data.quiet_time_remaining > 0
+      robot.brain.data.quiet_time_remaining -= INTERVAL
+      robot.brain.save()
+    else if robot.brain.data.quiet_time
+      robot.brain.data.quiet_time = false
+      robot.brain.save()
+
+  setInterval countdown, INTERVAL
 
   start_quiet_time = ->
     robot.brain.data.quiet_time = true
-    timer_id = setTimeout (->
-      end_quiet_time()
-    ), TIMEOUT
+    robot.brain.data.quiet_time_remaining = TIMEOUT
+    robot.brain.save()
 
   end_quiet_time = ->
-    clearTimeout(timer_id)
     robot.brain.data.quiet_time = false
+    robot.brain.data.quiet_time_remaining = 0
+    robot.brain.save()
+
+  remaining = ->
+    robot.brain.data.quiet_time_remaining / 1000
 
   robot.respond /shutup$/i, (msg) ->
     if !robot.brain.data.quiet_time
       start_quiet_time()
       msg.send "Fine. " + msg.random shutup_responses(msg.message.user)
+    else
+      msg.send "Already on timeout for another #{remaining()} seconds"
 
   robot.respond /come back$/, (msg) ->
     if robot.brain.data.quiet_time
