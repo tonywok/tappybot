@@ -13,7 +13,7 @@ module.exports = (robot) ->
     imageMe msg, "animated #{msg.match[1]}", (url) ->
       msg.send url
 
-  robot.respond /(\w* )?(?:mo?u)?sta(?:s|c)he?(?: me)? (.*)/i, (msg) ->
+  robot.respond /(\w*)? ?(?:mo?u)?sta(?:s|c)he?(?: me)? (.*)/i, (msg) ->
     imagery = msg.match[2]
     stache = msg.match[1]
 
