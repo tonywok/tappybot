@@ -1,8 +1,8 @@
 # A way to make tappy be quiet
 #
-# shutup - Make tappy be quiet for an hour
+# shutup - stop posting thuds for an hour
 #
-# come back - Bring tappy back
+# come back - start posting thuds again
 
 shutup_responses = (user) ->
   [

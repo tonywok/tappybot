@@ -2,7 +2,7 @@ http = require "http"
 url  = require "url"
 
 module.exports = (robot) ->
-  TIMEOUT = 1 * 60 * 60 * 1000
+  TIMEOUT = 10 * 60 * 1000
   START_HOUR = 8
   END_HOUR = 18
 
