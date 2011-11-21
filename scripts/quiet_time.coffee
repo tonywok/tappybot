@@ -4,6 +4,9 @@
 #
 # come back - start posting thuds again
 
+INTERVAL = 60 * 1000
+TIMEOUT = 60 * 60 * 1000
+
 shutup_responses = (user) ->
   [
     "I'll find another window to tap on.",
@@ -13,9 +16,6 @@ shutup_responses = (user) ->
   ]
 
 module.exports = (robot) ->
-  INTERVAL = 60 * 1000
-  TIMEOUT = 60 * 60 * 1000
-
   robot.brain.data.quiet_time ||= false
   robot.brain.data.quiet_time_remaining ||= 0
 
